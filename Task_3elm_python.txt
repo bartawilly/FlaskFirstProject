@@ -1,5 +1,0 @@
-monday : list - array - tuple
-tuesday : flask Docs
-wendesday: jinja2 (filters)
-for loop - if - inhertance
-thursday: bas 3ala el code

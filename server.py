@@ -1,7 +1,30 @@
-from flask import Flask, redirect, url_for, request, render_template,make_response,session
+from flask import Flask, redirect, url_for, request, render_template,make_response,session,flash
 from werkzeug import secure_filename
+from flask_mail import Mail, Message
+from flask_wtf import Form
+from wtforms import TextField, IntegerField, TextAreaField, SubmitField, RadioField, SelectField
+from wtforms import validators, ValidationError
 app = Flask(__name__)
 app.secret_key = 'sfkdngkshfgjlshfgjkshg'
+##############################
+class ContactForm(Form):
+   name = TextField("Name Of Student",[validators.Required("Please enter your name.")])
+   Gender = RadioField('Gender', choices = [('M','Male'),('F','Female')])
+   Address = TextAreaField("Address")
+   email = TextField("Email",[validators.Required("Please enter your email address."),
+      validators.Email("Please enter your email address correctly.")])
+   Age = IntegerField("age")
+   language = SelectField('Languages', choices = [('cpp', 'C++'), ('py', 'Python')])
+   submit = SubmitField("Send")
+##############################
+app.config['MAIL_SERVER']='smtp.gmail.com'
+app.config['MAIL_PORT'] = 465
+app.config['MAIL_USERNAME'] = 'xxx@gmail.com'
+app.config['MAIL_PASSWORD'] = 'xxx'
+app.config['MAIL_USE_TLS'] = False
+app.config['MAIL_USE_SSL'] = True
+mail = Mail(app)
+#############################
 @app.route('/')
 def hello_world():
    return 'hello word'
@@ -115,6 +138,25 @@ def upload():
       f.save(secure_filename(f.filename))
       return 'file uploaded successfully'
 #######	
+@app.route("/sendemail")
+def isendemail():
+   msg = Message('Hello', sender = 'xxx@gmail.com', recipients = ['xxx@gmail.com'])
+   msg.body = "Hello Mr. sergio from my server.py file!"
+   mail.send(msg)
+   return "Sent"
+########
+@app.route('/contact')
+def contact():
+   form = ContactForm()
+   if request.method == 'POST':
+      if form.validate() == False:
+         flash('All fields are required.')
+         return render_template('contact.html', form = form)
+      else:
+         return render_template('success.html')
+   elif request.method == 'GET':
+         return render_template('contact.html', form = form)
+########
 if __name__ == '__main__':
     app.debug = True
     app.run()
